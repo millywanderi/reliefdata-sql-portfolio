@@ -1,13 +1,14 @@
 
 -- ============================================================
 -- Project: ReliefData - Humanitarian Operations & SQL Analytics
--- File: 03_joins.sql
+-- File: sql/03_joins.sql
 -- Purpose: Practise SQL JOINs using fictional relief data.
+-- Database: MySQL 8+
 -- ============================================================
 
 -- BUSINESS CONTEXT
 -- Humanitarian organisations need to understand warehouse
--- capacity and relief distribution activity.
+-- locations, capacity and relief distribution activity.
 
 USE reliefdata;
 
@@ -19,7 +20,7 @@ USE reliefdata;
 SELECT
     w.warehouse_id,
     w.warehouse_name,
-    w.county,
+    w.location,
     d.distribution_id,
     d.quantity
 FROM warehouses AS w
@@ -36,7 +37,7 @@ INNER JOIN distributions AS d
 SELECT
     w.warehouse_id,
     w.warehouse_name,
-    w.county,
+    w.location,
     d.distribution_id,
     d.quantity
 FROM warehouses AS w
