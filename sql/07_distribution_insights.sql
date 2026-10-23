@@ -1,6 +1,6 @@
 -- ============================================================
 -- Project: ReliefData - Humanitarian Operations & SQL Analytics
--- File: sql/06_inventory_analysis.sql
+-- File: sql/07_inventory_analysis.sql
 -- Purpose: Warehouses distribute the most supplies and which items are being sent to communities.
 -- Database: MySQL 8+
 -- ============================================================
@@ -22,7 +22,8 @@ SELECT
     destination,
     COUNT(*) AS distribution_records
 FROM distributions
-GROUP BY destination;
+GROUP BY destination
+ORDER BY distribution_records DESC;
 
 -- High-volume items
 
@@ -31,7 +32,8 @@ SELECT
     SUM(quantity) AS distributed_quantity
 FROM distributions
 GROUP BY item
-HAVING distributed_quantity > 300;
+HAVING distributed_quantity > 300
+ORDER BY distributed_quantity DESC;
 
 -- Warehouse distribution summary
 SELECT
