@@ -32,3 +32,14 @@ SELECT
 FROM distributions
 GROUP BY item
 HAVING distributed_quantity > 300;
+
+-- Warehouse distribution summary
+SELECT
+    warehouses.warehouse_name,
+    COALESCE(SUM(distributions.quantity), 0) AS total_quantity_distributed
+FROM warehouses
+    LEFT JOIN distributions
+        ON warehouses.warehouse_id = distributions.warehouse_id
+GROUP BY 
+     warehouses.warehouse_id,
+     warehouses.warehouse_name;
