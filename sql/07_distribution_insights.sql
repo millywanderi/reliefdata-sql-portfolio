@@ -16,10 +16,19 @@ FROM distributions
 GROUP BY item
 ORDER BY total_quantity DESC;
 
---Number of destinations served
+-- Number of destinations served
 
 SELECT
     destination,
     COUNT(*) AS distribution_records
 FROM distributions
 GROUP BY destination;
+
+-- High-volume items
+
+SELECT
+    item,
+    SUM(quantity) AS distributed_quantity
+FROM distributions
+GROUP BY item
+HAVING distributed_quantity > 300;
