@@ -15,3 +15,11 @@ SELECT
 FROM distributions
 GROUP BY item
 ORDER BY total_quantity DESC;
+
+--Number of destinations served
+
+SELECT
+    destination,
+    COUNT(*) AS distribution_records
+FROM distributions
+GROUP BY destination;
