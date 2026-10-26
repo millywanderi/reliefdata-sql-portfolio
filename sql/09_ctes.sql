@@ -115,3 +115,37 @@ WHERE total_quantity > (
         average_destination_quantity
 )
 ORDER BY total_quantity DESC;
+
+-- Find each warehouse's total quantity distributed alongside the number of distribution records it has handled
+
+WITH warehouse_totals AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity,
+        COUNT(d.distribution_id) AS distribution_count
+    FROM warehouses as w
+    LEFT JOIN distributions as d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+),
+warehouse_counts AS (
+    SELECT
+        w.warehouse_name,
+        COUNT(d.distribution_id) AS distribution_count
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+)
+SELECT
+    wt.warehouse_name,
+    wt.total_quantity,
+    wc.distribution_count
+FROM warehouse_totals AS wt
+JOIN warehouse_counts AS wc
+    ON wt.warehouse_name = wc.warehouse_name
+ORDER BY wt.total_quantity DESC;
