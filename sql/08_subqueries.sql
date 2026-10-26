@@ -49,3 +49,21 @@ HAVING COALESCE(SUM(d.quantity), 0) > (
     ) AS warehouse_totals
 )
 ORDER BY total_quantity_distributed DESC;
+
+-- Find items above the average total quantity distributed
+SELECT
+    item,
+    COALESCE(SUM(quantity), 0) AS total_quantity_distributed
+FROM distributions
+GROUP BY item
+HAVING SUM(quantity) > (
+    SELECT AVG(item_distributed.total_quantity)
+    FROM (
+        SELECT
+            item,
+            COALESCE(SUM(quantity), 0) AS total_quantity
+        FROM distributions
+        GROUP BY item
+   ) AS item_distributed
+)
+ORDER BY total_quantity_distributed DESC;
