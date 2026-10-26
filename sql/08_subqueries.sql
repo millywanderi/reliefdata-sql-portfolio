@@ -51,6 +51,7 @@ HAVING COALESCE(SUM(d.quantity), 0) > (
 ORDER BY total_quantity_distributed DESC;
 
 -- Find items above the average total quantity distributed
+
 SELECT
     item,
     COALESCE(SUM(quantity), 0) AS total_quantity_distributed
@@ -67,3 +68,20 @@ HAVING SUM(quantity) > (
    ) AS item_distributed
 )
 ORDER BY total_quantity_distributed DESC;
+
+-- Find quantities above the average quantity for their item
+
+SELECT
+    d.distribution_id,
+    d.item,
+    d.quantity,
+    d.destination
+FROM distributions AS d
+WHERE d.quantity > (
+    SELECT AVG(quantity) AS individual_distribution_quantity
+    FROM distributions AS d2
+    WHERE d2.item = d.item
+)
+ORDER BY
+    d.item ASC,
+    d.quantity DESC;
