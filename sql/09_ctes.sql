@@ -89,3 +89,29 @@ WHERE total_quantity > (
     FROM average_item_quantity
 )
 ORDER BY total_quantity DESC;
+
+-- Find destinations more supplies than the average quantity distributed
+
+WITH destination_totals AS (
+    SELECT
+        destination,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY destination
+),
+average_destination_quantity AS (
+    SELECT
+        AVG(total_quantity) AS average_quantity
+    FROM destination_totals
+)
+SELECT
+    destination,
+    total_quantity
+FROM destination_totals
+WHERE total_quantity > (
+    SELECT
+        average_quantity 
+    FROM
+        average_destination_quantity
+)
+ORDER BY total_quantity DESC;
