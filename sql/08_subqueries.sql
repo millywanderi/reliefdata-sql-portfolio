@@ -23,7 +23,7 @@ WHERE quantity >
     FROM distributions)
 ORDER BY quantity DESC;
 
--- Challenge 09: Find warehouses above the average warehouse total
+-- Find warehouses above the average warehouse total
 
 SELECT
     w.warehouse_name,
