@@ -41,3 +41,26 @@ SELECT
     total_quantity
 FROM warehouse_totals
 ORDER BY total_quantity DESC;
+
+-- Find total quantities greater than the average total across all warehouses
+
+WITH warehouse_totals AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+)
+SELECT
+    warehouse_name,
+    total_quantity
+FROM warehouse_totals
+WHERE total_quantity > (
+    SELECT AVG(total_quantity)
+        FROM warehouse_totals
+)
+ORDER BY total_quantity DESC;
