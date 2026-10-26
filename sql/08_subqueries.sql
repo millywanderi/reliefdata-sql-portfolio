@@ -85,3 +85,37 @@ WHERE d.quantity > (
 ORDER BY
     d.item ASC,
     d.quantity DESC;
+
+-- average quantity distributed for that same item across all warehouses
+
+SELECT
+    w.warehouse_name,
+    d.item,
+    SUM(d.quantity) AS total_quantity_distributed
+FROM warehouses AS w
+    INNER JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+
+GROUP BY
+    w.warehouse_id,
+    w.warehouse_name,
+    d.item
+HAVING SUM(d.quantity) > (
+    SELECT AVG(warehouse_totals.total_quantity)
+    FROM (
+        SELECT 
+            w2.warehouse_id,
+            d2.item,
+            SUM(d2.quantity) AS total_quantity
+        FROM warehouses AS w2
+        INNER JOIN distributions AS d2
+            ON w2.warehouse_id = d2.warehouse_id
+        GROUP BY
+            w2.warehouse_id,
+            w2.warehouse_name,
+            d2.item
+) AS warehouse_totals
+)
+ORDER BY
+    d.item ASC,
+    total_quantity_distributed DESC;
