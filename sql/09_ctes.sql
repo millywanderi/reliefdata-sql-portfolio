@@ -64,3 +64,28 @@ WHERE total_quantity > (
         FROM warehouse_totals
 )
 ORDER BY total_quantity DESC;
+
+-- Find items with total distributed quantity greater than the average quantity
+
+WITH item_totals AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+average_item_quantity AS (
+    SELECT
+        AVG(total_quantity) AS average_quantity
+    FROM item_totals
+)
+SELECT
+    item,
+    total_quantity
+FROM item_totals
+WHERE total_quantity > (
+    SELECT
+        average_quantity
+    FROM average_item_quantity
+)
+ORDER BY total_quantity DESC;
