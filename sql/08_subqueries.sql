@@ -1,6 +1,6 @@
 -- ============================================================
 -- Project: ReliefData - Humanitarian Operations & SQL Analytics
--- File: sql/08_warehouse_performance.sql
+-- File: sql/08_subqueries.sql
 -- Purpose: Analyse warehouse distribution performance.
 -- Database: MySQL 8+
 -- ============================================================
