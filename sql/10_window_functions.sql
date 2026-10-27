@@ -36,3 +36,19 @@ SELECT
     ) AS percentage_of_total
 FROM item_totals
 ORDER BY total_quantity DESC;
+
+-- Running total of relief distributions
+
+WITH quantity_distributed_accumulates AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+)
+SELECT
+    item,
+    total_quantity,
+    SUM(total_quantity) OVER(ORDER BY total_quantity DESC) AS running_total
+FROM quantity_distributed_accumulates
+ORDER BY total_quantity DESC;
