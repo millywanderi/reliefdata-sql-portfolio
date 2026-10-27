@@ -149,3 +149,32 @@ FROM warehouse_totals AS wt
 JOIN warehouse_counts AS wc
     ON wt.warehouse_name = wc.warehouse_name
 ORDER BY wt.total_quantity DESC;
+
+-- Find how much of each warehouse's capacity has been used by distributed supplies
+
+WITH warehouse_capacity AS (
+    SELECT
+        w.warehouse_name,
+        w.capacity,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        w.capacity
+)
+SELECT
+    warehouse_name,
+    capacity,
+    total_quantity,
+    capacity - total_quantity AS remaining_capacity,
+    ROUND((total_quantity / capacity) * 100, 2)
+        AS utilization_percentage,
+    CONCAT(
+        ROUND((total_quantity / capacity) * 100, 2),
+       '%' 
+    ) AS utilization_display
+FROM warehouse_capacity
+ORDER BY utilization_percentage DESC;
