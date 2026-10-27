@@ -52,3 +52,24 @@ SELECT
     SUM(total_quantity) OVER(ORDER BY total_quantity DESC) AS running_total
 FROM quantity_distributed_accumulates
 ORDER BY total_quantity DESC;
+
+-- Compare each item with the previous item
+
+WITH compare_quantity_distributed AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+)
+SELECT
+    item,
+    total_quantity,
+    LAG(total_quantity) OVER (
+        ORDER BY total_quantity DESC
+    ) AS previous_item_quantity,
+    total_quantity - LAG(total_quantity) OVER (
+        ORDER BY total_quantity DESC
+    ) AS quantity_difference
+FROM compare_quantity_distributed
+ORDER BY total_quantity DESC;
