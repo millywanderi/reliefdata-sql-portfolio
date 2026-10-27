@@ -94,3 +94,33 @@ SELECT
     ) - total_quantity AS quantity_drop
 FROM large_drops_distributions
 ORDER BY total_quantity DESC;
+
+-- Find items with a drop greater than 100
+
+WITH distribution_item_drop AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+previous_distributed_item AS (
+    SELECT
+        item,
+        total_quantity,
+        LAG(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) AS previous_item_quantity,
+        LAG(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) - total_quantity AS quantity_drop
+        FROM distribution_item_drop
+)
+SELECT
+    item,
+    total_quantity,
+    previous_item_quantity,
+    quantity_drop
+FROM previous_distributed_item
+WHERE quantity_drop > 100
+ORDER BY total_quantity DESC;
