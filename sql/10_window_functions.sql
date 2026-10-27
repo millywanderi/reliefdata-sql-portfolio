@@ -73,3 +73,24 @@ SELECT
     ) AS quantity_difference
 FROM compare_quantity_distributed
 ORDER BY total_quantity DESC;
+
+-- Identify large drops in distributions
+
+WITH large_drops_distributions AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+)
+SELECT
+    item,
+    total_quantity,
+    LAG(total_quantity) OVER (
+        ORDER BY total_quantity DESC
+    ) AS previous_item_quantity,
+    LAG(total_quantity) OVER (
+        ORDER BY total_quantity DESC
+    ) - total_quantity AS quantity_drop
+FROM large_drops_distributions
+ORDER BY total_quantity DESC;
