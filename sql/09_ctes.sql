@@ -178,3 +178,27 @@ SELECT
     ) AS utilization_display
 FROM warehouse_capacity
 ORDER BY utilization_percentage DESC;
+
+-- Find total distributed quantity is greater than the average total quantity per item
+
+WITH distribution_items AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+average_distributed_items AS (
+    SELECT
+        AVG(total_quantity) AS average_item_quantity
+    FROM distribution_items
+)
+SELECT
+    di.item,
+    di.total_quantity,
+    adi.average_item_quantity
+FROM distribution_items AS di
+CROSS JOIN average_distributed_items AS adi
+WHERE di.total_quantity > adi.average_item_quantity
+ORDER BY di.total_quantity DESC;
+
