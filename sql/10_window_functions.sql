@@ -161,3 +161,29 @@ FROM above_average_drop AS d
 CROSS JOIN above_average_cte AS a
 WHERE quantity_drop > average_drop
 ORDER BY total_quantity DESC;
+
+-- Look ahead to the next item
+
+WITH look_ahead_next AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+next_item AS (
+    SELECT
+        item,
+        total_quantity,
+        LEAD(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) AS next_item_quantity
+    FROM look_ahead_next
+)
+SELECT
+    item,
+    total_quantity,
+    next_item_quantity,
+    total_quantity - next_item_quantity AS quantity_difference
+FROM next_item
+ORDER BY total_quantity DESC;
