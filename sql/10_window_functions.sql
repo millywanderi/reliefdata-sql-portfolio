@@ -217,3 +217,21 @@ SELECT
 FROM next_item
 WHERE quantity_difference > 100
 ORDER BY total_quantity DESC;
+
+-- Give every item a unique position
+
+WITH item_unique_position AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+)
+SELECT
+    item,
+    total_quantity,
+    ROW_NUMBER () OVER (
+        ORDER BY total_quantity DESC
+    ) AS item_position
+FROM item_unique_position
+ORDER BY total_quantity DESC;
