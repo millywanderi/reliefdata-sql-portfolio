@@ -124,3 +124,40 @@ SELECT
 FROM previous_distributed_item
 WHERE quantity_drop > 100
 ORDER BY total_quantity DESC;
+
+-- Find items with an above-average drop
+
+WITH distribution_above_average AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+above_average_drop AS (
+    SELECT
+        item,
+        total_quantity,
+        LAG(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) AS previous_item_quantity,
+        LAG(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) - total_quantity AS quantity_drop
+    FROM distribution_above_average
+),
+above_average_cte AS (
+    SELECT AVG(quantity_drop) AS average_drop
+    FROM above_average_drop
+)
+
+SELECT
+    d.item,
+    d.total_quantity,
+    d.previous_item_quantity,
+    d.quantity_drop,
+    a.average_drop
+FROM above_average_drop AS d
+CROSS JOIN above_average_cte AS a
+WHERE quantity_drop > average_drop
+ORDER BY total_quantity DESC;
