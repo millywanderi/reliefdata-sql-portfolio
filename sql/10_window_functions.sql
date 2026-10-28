@@ -235,3 +235,29 @@ SELECT
     ) AS item_position
 FROM item_unique_position
 ORDER BY total_quantity DESC;
+
+-- Find the top two relief items
+
+WITH top_relief_items AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+row_number_cte AS (
+    SELECT
+        item,
+        total_quantity,
+        ROW_NUMBER () OVER (
+            ORDER BY total_quantity DESC
+        ) AS item_position
+    FROM top_relief_items
+)
+SELECT
+    item,
+    total_quantity,
+    item_position
+FROM row_number_cte
+WHERE item_position IN (1, 2)
+ORDER BY total_quantity DESC;
