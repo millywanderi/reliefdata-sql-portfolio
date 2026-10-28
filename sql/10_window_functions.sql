@@ -187,3 +187,33 @@ SELECT
     total_quantity - next_item_quantity AS quantity_difference
 FROM next_item
 ORDER BY total_quantity DESC;
+
+-- Find items whose quantity exceeds the next item's quantity by more than 100
+
+WITH look_ahead_next AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+next_item AS (
+    SELECT
+        item,
+        total_quantity,
+        LEAD(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) AS next_item_quantity,
+        total_quantity - LEAD(total_quantity) OVER (
+            ORDER BY total_quantity DESC
+        ) AS quantity_difference
+    FROM look_ahead_next
+)
+SELECT
+    item,
+    total_quantity,
+    next_item_quantity,
+    quantity_difference
+FROM next_item
+WHERE quantity_difference > 100
+ORDER BY total_quantity DESC;
