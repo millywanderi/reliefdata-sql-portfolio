@@ -221,6 +221,21 @@ The repository will not contain confidential employer data, real beneficiary ide
 
 The project has progressed beyond SQL practice exercises to include reproducible analytical queries and preliminary findings. Reporting, visualisation, and final repository documentation are the next development priorities.
 
+
+## Case Study Report
+
+The ReliefData case study analyzes fictional humanitarian warehouse capacity, inventory risk, and distribution activity using MySQL 8.0. It combines SQL analysis with Python visualizations to demonstrate how data can support operational reporting.
+
+**[Read the full case study report](docs/case_study_report.md)**
+
+### Visualizations
+
+- [Warehouse capacity comparison](docs/warehouse_capacity.png)
+- [Available inventory vs minimum stock](docs/inventory_vs_minimum.png)
+- [Distribution quantities by item](docs/distribution_by_item.png)
+
+**Data disclaimer:** All records are fictional sample data created for portfolio and learning purposes. They do not represent actual humanitarian operations.
+
 ## About the Author
 
 **Millicent Wanderi**
