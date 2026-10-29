@@ -464,3 +464,38 @@ FROM utilisation_percentage_cte
 CROSS JOIN average_utilisation_cte
 WHERE utilisation_percentage > average_utilisation
 ORDER BY utilisation_percentage DESC;
+
+-- Find utilisation percentage below the average
+
+WITH rank_warehouses_capacity AS (
+    SELECT
+        w.warehouse_name,
+        w.capacity,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        w.capacity
+),
+utilisation_percentage_cte AS (
+    SELECT
+        warehouse_name,
+        ROUND((total_distributed / capacity) * 100.0, 2) AS utilisation_percentage
+    FROM rank_warehouses_capacity
+),
+average_utilisation_cte AS (
+    SELECT
+        AVG(utilisation_percentage) AS average_utilisation
+    FROM utilisation_percentage_cte
+)
+SELECT
+    warehouse_name,
+    CONCAT(utilisation_percentage, '%') AS utilisation_percentage,
+    average_utilisation
+FROM utilisation_percentage_cte
+CROSS JOIN average_utilisation_cte
+WHERE utilisation_percentage < average_utilisation
+ORDER BY utilisation_percentage DESC;
