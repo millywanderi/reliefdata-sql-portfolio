@@ -129,3 +129,33 @@ SELECT
     total_distributed - average_distributed AS difference_from_average
 FROM average_distributed_cte
 ORDER BY difference_from_average DESC;
+
+-- Rank warehouses by how far they are from average
+
+WITH warehouses_far_average AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+),
+average_distributed_cte AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        total_distributed - AVG(total_distributed) OVER () AS difference_from_average
+    FROM warehouses_far_average
+)
+SELECT
+    warehouse_name,
+    total_distributed,
+    difference_from_average,
+    RANK () OVER (
+        ORDER BY ABS(difference_from_average) DESC
+    ) AS deviation_rank
+FROM average_distributed_cte
+ORDER BY difference_from_average DESC;
