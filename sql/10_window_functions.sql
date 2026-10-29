@@ -287,3 +287,39 @@ SELECT
 FROM second_position
 WHERE item_position = 2
 ORDER BY total_quantity DESC;
+
+-- Rank items within each warehouse
+
+WITH rank_item_warehouse AS (
+    SELECT
+        w.warehouse_name,
+        d.item,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity
+    FROM warehouses AS w
+    LEFT JOIN distributions as d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        d.item
+),
+item_rank_cte AS (
+    SELECT
+        warehouse_name,
+        item,
+        total_quantity,
+        RANK () OVER (
+            PARTITION BY warehouse_name
+            ORDER BY total_quantity DESC
+        ) AS item_rank
+    FROM rank_item_warehouse
+
+)
+SELECT
+    warehouse_name,
+    item,
+    total_quantity,
+    item_rank
+FROM item_rank_cte
+WHERE item IS NOT NULL
+ORDER BY warehouse_name, total_quantity DESC;
