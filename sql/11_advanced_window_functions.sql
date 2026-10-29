@@ -159,3 +159,51 @@ SELECT
     ) AS deviation_rank
 FROM average_distributed_cte
 ORDER BY difference_from_average DESC;
+
+-- Identify the two most underperforming warehouses
+
+WITH most_undersperforming_warehouses AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions as d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+),
+average_difference_cte AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        total_distributed - AVG(total_distributed) OVER () AS difference_from_average
+    FROM most_undersperforming_warehouses
+),
+underperforming_warehouses AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        difference_from_average
+    FROM average_difference_cte
+    WHERE difference_from_average < 0
+),
+rank_cte AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        difference_from_average,
+        RANK () OVER (
+            ORDER BY difference_from_average ASC
+        ) AS underperformance_rank
+    FROM underperforming_warehouses
+)
+SELECT
+    warehouse_name,
+    total_distributed,
+    difference_from_average,
+    underperformance_rank
+FROM rank_cte
+WHERE underperformance_rank IN (1,2)
+ORDER BY difference_from_average ASC;
+
