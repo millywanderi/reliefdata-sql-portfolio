@@ -36,3 +36,33 @@ SELECT
 FROM warehouse_rank_cte
 WHERE warehouse_rank IN (1,2)
 ORDER BY total_distributed DESC;
+
+-- Compare each warehouse with the previous warehouse
+
+WITH previous_quantity_distributed AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+),
+previous_quantity_cte AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        LAG(total_distributed) OVER (
+            ORDER BY total_distributed DESC
+        ) AS previous_warehouse_quantity
+    FROM previous_quantity_distributed
+)
+SELECT
+    warehouse_name,
+    total_distributed,
+    previous_warehouse_quantity,
+    total_distributed - previous_warehouse_quantity AS quantity_difference
+FROM previous_quantity_cte
+ORDER BY total_distributed DESC;
