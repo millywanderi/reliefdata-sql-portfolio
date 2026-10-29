@@ -323,3 +323,75 @@ SELECT
 FROM item_rank_cte
 WHERE item IS NOT NULL
 ORDER BY warehouse_name, total_quantity DESC;
+
+-- Find the top item in each warehouse
+
+WITH top_item_cte AS (
+    SELECT
+        w.warehouse_name,
+        d.item,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        d.item
+),
+item_position_cte AS (
+    SELECT
+        warehouse_name,
+        item,
+        total_quantity,
+        RANK () OVER (
+            PARTITION BY warehouse_name
+            ORDER BY total_quantity DESC
+        ) AS item_rank
+    FROM top_item_cte
+)
+SELECT
+    warehouse_name,
+    item,
+    total_quantity,
+    item_rank
+FROM item_position_cte
+WHERE item IS NOT NULL
+      AND item_rank = 1
+ORDER BY item, total_quantity DESC;
+
+-- Find the lowest-ranked item in each warehouse
+
+WITH lowest_ranked_item AS (
+    SELECT
+        w.warehouse_name,
+        d.item,
+        COALESCE(SUM(d.quantity), 0) AS total_quantity
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        d.item
+),
+lowest_item_cte AS (
+    SELECT
+        warehouse_name,
+        item,
+        total_quantity,
+        RANK () OVER (
+            PARTITION BY warehouse_name
+            ORDER BY total_quantity ASC
+        ) AS item_rank
+    FROM lowest_ranked_item
+)
+SELECT
+    warehouse_name,
+    item,
+    total_quantity,
+    item_rank
+FROM lowest_item_cte
+WHERE item IS NOT NULL
+      AND item_rank = 1
+ORDER BY total_quantity ASC;
