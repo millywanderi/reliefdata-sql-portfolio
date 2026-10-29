@@ -101,3 +101,31 @@ SELECT
     ) AS percentage_change
 FROM previous_quantity_cte
 ORDER BY total_distributed DESC;
+
+-- Compare each warehouse with the average
+
+WITH warehouse_average_cte AS (
+    SELECT
+        w.warehouse_name,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name
+),
+average_distributed_cte AS (
+    SELECT
+        warehouse_name,
+        total_distributed,
+        AVG(total_distributed) OVER () AS average_distributed
+    FROM warehouse_average_cte
+)
+SELECT
+    warehouse_name,
+    total_distributed,
+    average_distributed,
+    total_distributed - average_distributed AS difference_from_average
+FROM average_distributed_cte
+ORDER BY difference_from_average DESC;
