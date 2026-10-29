@@ -395,3 +395,37 @@ FROM lowest_item_cte
 WHERE item IS NOT NULL
       AND item_rank = 1
 ORDER BY total_quantity ASC;
+
+-- Rank warehouses by capacity utilisation
+
+WITH rank_warehouses_capacity AS (
+    SELECT
+        w.warehouse_name,
+        w.capacity,
+        COALESCE(SUM(d.quantity), 0) AS total_distributed
+    FROM warehouses AS w
+    LEFT JOIN distributions AS d
+        ON w.warehouse_id = d.warehouse_id
+    GROUP BY
+        w.warehouse_id,
+        w.warehouse_name,
+        w.capacity
+),
+utilisation_percentage_cte AS (
+    SELECT
+        warehouse_name,
+        capacity,
+        total_distributed,
+        ROUND((total_distributed / capacity) * 100.0, 2) AS utilisation_percentage
+    FROM rank_warehouses_capacity
+)
+SELECT
+    warehouse_name,
+    capacity,
+    total_distributed,
+    CONCAT(utilisation_percentage, '%') AS utilisation_percentage,
+    RANK () OVER (
+        ORDER BY utilisation_percentage DESC
+    ) AS utilisation_rank
+FROM utilisation_percentage_cte
+ORDER BY utilisation_percentage DESC;
