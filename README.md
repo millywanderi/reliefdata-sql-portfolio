@@ -154,12 +154,20 @@ The findings demonstrate an analytical method and should not be generalised to r
 
 ## Project Structure
 
-The repository is being developed incrementally. The following is the intended structure for the case study; filenames should be updated to match the actual repository contents.
-
+The repository contains SQL practice exercises, a fictional humanitarian logistics case study, visualizations, and scripts used to generate the report.
 
 ```text
 reliefdata-sql-portfolio/
 ├── README.md
+├── docs/
+│   ├── case_study_report.md
+│   ├── ReliefData_Case_Study_Report.pdf
+│   ├── warehouse_capacity.png
+│   ├── inventory_vs_minimum.png
+│   └── distribution_by_item.png
+├── scripts/
+│   ├── create_case_study_charts.py
+│   └── create_case_study_pdf.py
 └── sql/
     ├── 03_joins.sql
     ├── 04_inventory_analysis.sql
