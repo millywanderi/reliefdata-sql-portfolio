@@ -261,3 +261,29 @@ SELECT
 FROM row_number_cte
 WHERE item_position IN (1, 2)
 ORDER BY total_quantity DESC;
+
+-- Find the second-highest relief item
+
+WITH second_highest_relief AS (
+    SELECT
+        item,
+        SUM(quantity) AS total_quantity
+    FROM distributions
+    GROUP BY item
+),
+second_position AS (
+    SELECT
+        item,
+        total_quantity,
+        ROW_NUMBER () OVER (
+            ORDER BY total_quantity DESC
+        ) AS item_position
+    FROM second_highest_relief
+)
+SELECT
+    item,
+    total_quantity,
+    item_position
+FROM second_position
+WHERE item_position = 2
+ORDER BY total_quantity DESC;
